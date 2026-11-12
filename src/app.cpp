@@ -91,6 +91,10 @@ bool App::Init(const LaunchOptions& options) {
 
     library.Scan(renderer, settings.game_dirs);
     home_.SetSelected(options_.select);
+    compat.Init(config_dir);
+    if (options_.screenshot.empty()) {
+        audio.Init();
+    }
     if (!options_.boot_title_id.empty()) {
         auto& games = library.Games();
         const auto it = std::find_if(games.begin(), games.end(), [&](const Game& g) {
@@ -104,13 +108,17 @@ bool App::Init(const LaunchOptions& options) {
         }
     }
     if (options_.open_settings) {
-        settings_open = true;
-        settings_panel_.Open(*this);
+        OpenSettings();
+    }
+    if (options_.open_info && !library.Games().empty()) {
+        info_open = true;
+        info_panel_.Open(*this, home_.Selected());
     }
     return true;
 }
 
 void App::Shutdown() {
+    audio.Shutdown();
     library = Library{};
     home_ = HomeScreen{};
     if (imgui_ready_) {
@@ -133,8 +141,8 @@ int App::Run() {
 
     while (!quit_) {
         // Rendu à la demande : on dort tant que rien ne bouge pour rester léger.
-        const bool busy = home_.IsAnimating() || settings_open || stick_held_ ||
-                          Now() < toast_until;
+        const bool busy = home_.IsAnimating() || settings_open || info_open || stick_held_ ||
+                          audio.IsFading() || Now() < toast_until;
         int timeout_ms = busy ? 0 : 500;
         if (emulator.IsRunning()) {
             timeout_ms = 250;
@@ -161,6 +169,11 @@ int App::Run() {
         ProcessDialogResults();
         UpdateRunningGame();
         HandleStick(dt);
+        compat.Update();
+        UpdateMusic();
+        audio.sfx_enabled = settings.sounds;
+        audio.music_enabled = settings.music;
+        audio.Update(dt);
 
         if (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) {
             continue;
@@ -189,6 +202,13 @@ void App::DrawFrame(float dt, bool capture) {
 
     if (settings_open && !settings_panel_.Draw(*this, size)) {
         settings_open = false;
+        audio.Play(Sfx::Back);
+    }
+    if (info_open && !info_panel_.Draw(*this, size)) {
+        info_open = false;
+        if (!emulator.IsRunning()) {
+            audio.Play(Sfx::Back);
+        }
     }
     if (emulator.IsRunning()) {
         DrawRunningOverlay(ImGui::GetForegroundDrawList());
@@ -235,6 +255,7 @@ void App::HandleEvent(const SDL_Event& event) {
         case SDLK_ESCAPE:
         case SDLK_BACKSPACE: HandleAction(Action::Back); break;
         case SDLK_TAB: HandleAction(Action::Options); break;
+        case SDLK_I: HandleAction(Action::Info); break;
         case SDLK_F11:
             SDL_SetWindowFullscreen(window, !(SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN));
             break;
@@ -249,7 +270,7 @@ void App::HandleEvent(const SDL_Event& event) {
         case SDL_GAMEPAD_BUTTON_DPAD_DOWN: HandleAction(Action::Down); break;
         case SDL_GAMEPAD_BUTTON_SOUTH: HandleAction(Action::Confirm); break;
         case SDL_GAMEPAD_BUTTON_EAST: HandleAction(Action::Back); break;
-        case SDL_GAMEPAD_BUTTON_NORTH:
+        case SDL_GAMEPAD_BUTTON_NORTH: HandleAction(Action::Info); break;
         case SDL_GAMEPAD_BUTTON_START: HandleAction(Action::Options); break;
         default: break;
         }
@@ -273,21 +294,32 @@ void App::HandleAction(Action action) {
         }
         return;
     }
-    // Le panneau de réglages est piloté par la navigation clavier/manette d'ImGui.
-    if (settings_open) {
+    // Les panneaux sont pilotés par la navigation clavier/manette d'ImGui.
+    if (settings_open || info_open) {
         return;
     }
 
     const int tile_count = static_cast<int>(library.Games().size()) + 1;
+    const int before = home_.Selected();
     switch (action) {
     case Action::Left: home_.Move(-1, tile_count); break;
     case Action::Right: home_.Move(1, tile_count); break;
-    case Action::Confirm: home_.Confirm(*this); break;
-    case Action::Options:
-        settings_open = true;
-        settings_panel_.Open(*this);
+    case Action::Confirm:
+        audio.Play(Sfx::Confirm);
+        home_.Confirm(*this);
+        break;
+    case Action::Options: OpenSettings(); break;
+    case Action::Info:
+        if (home_.Selected() < static_cast<int>(library.Games().size())) {
+            audio.Play(Sfx::Open);
+            info_open = true;
+            info_panel_.Open(*this, home_.Selected());
+        }
         break;
     default: break;
+    }
+    if (home_.Selected() != before) {
+        audio.Play(Sfx::Move);
     }
 }
 
@@ -310,17 +342,44 @@ void App::HandleStick(float dt) {
     }
 }
 
+void App::OpenSettings() {
+    audio.Play(Sfx::Open);
+    settings_open = true;
+    settings_panel_.Open(*this);
+}
+
+// La musique du jeu ne démarre qu'après une courte pause sur la tuile, comme sur PS4,
+// pour ne pas décoder un fichier à chaque déplacement rapide.
+void App::UpdateMusic() {
+    constexpr double kDelay = 0.8;
+    const int selected = home_.Selected();
+    if (selected != music_selection_) {
+        music_selection_ = selected;
+        selection_changed_at_ = Now();
+        audio.PlayMusic({});
+        return;
+    }
+    if (emulator.IsRunning()) {
+        audio.PlayMusic({});
+        return;
+    }
+    auto& games = library.Games();
+    if (Now() - selection_changed_at_ >= kDelay && selected < static_cast<int>(games.size())) {
+        audio.PlayMusic(games[selected].music_path);
+    }
+}
+
 void App::LaunchGame(Game& game) {
     std::string error;
     if (!emulator.Launch(settings.emulator_path, game.root, settings.fullscreen, error)) {
         ShowToast(error);
         if (settings.emulator_path.empty()) {
-            settings_open = true;
-            settings_panel_.Open(*this);
+            OpenSettings();
         }
         return;
     }
     running_title = game.title;
+    audio.PlayMusic({});
     if (settings.minimize_while_playing) {
         SDL_MinimizeWindow(window);
     }

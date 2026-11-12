@@ -11,6 +11,8 @@ struct Settings {
     bool fullscreen = true;
     bool animations = true;
     bool minimize_while_playing = true;
+    bool sounds = true;
+    bool music = true;
 
     void Load(const std::filesystem::path& file);
     bool Save(const std::filesystem::path& file) const;

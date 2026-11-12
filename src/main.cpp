@@ -12,6 +12,7 @@
 //   --screenshot <png>       rend l'interface hors écran et enregistre une capture
 //   --select <n>             sélectionne la n-ième tuile au démarrage
 //   --settings               ouvre directement les réglages
+//   --info                   ouvre la fiche du jeu sélectionné
 int main(int argc, char* argv[]) {
     LaunchOptions options;
     for (int i = 1; i < argc; ++i) {
@@ -24,6 +25,8 @@ int main(int argc, char* argv[]) {
             options.select = std::atoi(argv[++i]);
         } else if (!std::strcmp(argv[i], "--boot") && has_value) {
             options.boot_title_id = argv[++i];
+        } else if (!std::strcmp(argv[i], "--info")) {
+            options.open_info = true;
         } else if (!std::strcmp(argv[i], "--settings")) {
             options.open_settings = true;
         }

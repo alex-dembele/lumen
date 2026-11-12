@@ -364,6 +364,17 @@ void HomeScreen::DrawTiles(App& app, ImDrawList* dl, ImVec2 size, float s, float
     Theme::DrawTextShadow(dl, app.fonts.body, s, ImVec2(text_pos.x, info_y), Theme::kTextDim,
                           info.c_str());
 
+    // Pastille de compatibilité shadPS4 à droite des infos.
+    if (is_game && app.compat.Loaded()) {
+        const CompatEntry* entry = app.compat.Find(games[selected_].title_id);
+        const CompatStatus status = entry ? entry->status : CompatStatus::Unknown;
+        const float x0 = text_pos.x + Theme::TextSize(app.fonts.body, s, info.c_str()).x + 28 * s;
+        const float cy = info_y + Theme::FontPx(app.fonts.body, s) / 2;
+        dl->AddCircleFilled(ImVec2(x0, cy), 6 * s, Compatibility::Color(status), 16);
+        Theme::DrawTextShadow(dl, app.fonts.body, s, ImVec2(x0 + 14 * s, info_y),
+                              Compatibility::Color(status), Compatibility::Label(status));
+    }
+
     const char* label = is_game ? "Démarrer" : "Parcourir";
     const ImVec2 lsz = Theme::TextSize(app.fonts.body, s, label);
     const ImVec2 b0(text_pos.x, info_y + Theme::FontPx(app.fonts.body, s) + 26 * s);
@@ -383,7 +394,8 @@ void HomeScreen::DrawHints(App& app, ImDrawList* dl, ImVec2 size, float s) {
     };
     const Hint hints[] = {
         {Theme::PadButton::Cross, "Valider  (Entrée)"},
-        {Theme::PadButton::Triangle, "Réglages  (Tab)"},
+        {Theme::PadButton::Triangle, "Infos  (I)"},
+        {Theme::PadButton::Options, "Réglages  (Tab)"},
     };
 
     float x = size.x - 80 * s;

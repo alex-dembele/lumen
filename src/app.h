@@ -7,14 +7,17 @@
 
 #include <SDL3/SDL.h>
 
+#include "audio.h"
+#include "compat.h"
 #include "emulator.h"
 #include "library.h"
 #include "settings.h"
+#include "ui/game_info.h"
 #include "ui/home.h"
 #include "ui/settings_panel.h"
 #include "ui/theme.h"
 
-enum class Action { Up, Down, Left, Right, Confirm, Back, Options };
+enum class Action { Up, Down, Left, Right, Confirm, Back, Options, Info };
 
 struct LaunchOptions {
     std::filesystem::path config_dir;
@@ -22,6 +25,7 @@ struct LaunchOptions {
     std::string boot_title_id;
     int select = 0;
     bool open_settings = false;
+    bool open_info = false;
 };
 
 class App {
@@ -48,9 +52,12 @@ public:
     Settings settings;
     Library library;
     Emulator emulator;
+    Audio audio;
+    Compatibility compat;
     std::string running_title;
 
     bool settings_open = false;
+    bool info_open = false;
     std::string toast;
     double toast_until = 0.0;
 
@@ -64,11 +71,16 @@ private:
     void DrawToast(ImDrawList* dl);
     void DrawRunningOverlay(ImDrawList* dl);
     void AddDroppedPath(const std::filesystem::path& path);
+    void UpdateMusic();
+    void OpenSettings();
 
     LaunchOptions options_;
     std::filesystem::path settings_file_;
     HomeScreen home_;
     SettingsPanel settings_panel_;
+    GameInfoPanel info_panel_;
+    int music_selection_ = -1;
+    double selection_changed_at_ = 0.0;
     bool quit_ = false;
     bool imgui_ready_ = false;
     bool capture_ok_ = false;

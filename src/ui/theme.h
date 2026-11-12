@@ -17,7 +17,7 @@ inline constexpr ImU32 kText = IM_COL32(255, 255, 255, 255);
 inline constexpr ImU32 kTextDim = IM_COL32(205, 220, 240, 200);
 inline constexpr ImU32 kAccent = IM_COL32(0, 112, 204, 255);
 
-enum class PadButton { Cross, Circle, Triangle, Square };
+enum class PadButton { Cross, Circle, Triangle, Square, Options };
 
 // Les polices sont rastérisées pour un écran 1080p multiplié par atlas_scale, puis
 // dessinées à la taille de la fenêtre courante (s = hauteur / 1080).

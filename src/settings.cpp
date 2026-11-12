@@ -55,6 +55,10 @@ void Settings::Load(const std::filesystem::path& file) {
             animations = value == "1";
         } else if (key == "minimize_while_playing") {
             minimize_while_playing = value == "1";
+        } else if (key == "sounds") {
+            sounds = value == "1";
+        } else if (key == "music") {
+            music = value == "1";
         }
     }
 }
@@ -72,6 +76,8 @@ bool Settings::Save(const std::filesystem::path& file) const {
     out << "fullscreen=" << (fullscreen ? 1 : 0) << '\n';
     out << "animations=" << (animations ? 1 : 0) << '\n';
     out << "minimize_while_playing=" << (minimize_while_playing ? 1 : 0) << '\n';
+    out << "sounds=" << (sounds ? 1 : 0) << '\n';
+    out << "music=" << (music ? 1 : 0) << '\n';
     return static_cast<bool>(out);
 }
 

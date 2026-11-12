@@ -20,7 +20,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y ninja-build libx11-dev libxext-dev libxrandr-dev libxcursor-dev \
             libxi-dev libxss-dev libxtst-dev libxkbcommon-dev libwayland-dev libegl1-mesa-dev \
-            libdbus-1-dev libudev-dev
+            libdbus-1-dev libudev-dev libasound2-dev libpulse-dev libpipewire-0.3-dev
 
       - name: Configurer
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release

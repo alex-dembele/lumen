@@ -115,6 +115,13 @@ void DrawPadButton(ImDrawList* dl, ImVec2 c, float r, PadButton button) {
         dl->AddTriangle(ImVec2(c.x, c.y - s), ImVec2(c.x + s, c.y + s * 0.75f),
                         ImVec2(c.x - s, c.y + s * 0.75f), IM_COL32(64, 226, 160, 255), t);
         break;
+    case PadButton::Options:
+        for (int i = -1; i <= 1; ++i) {
+            const float y = c.y + i * s * 0.55f;
+            dl->AddLine(ImVec2(c.x - s * 0.8f, y), ImVec2(c.x + s * 0.8f, y),
+                        IM_COL32(220, 225, 235, 255), t * 0.8f);
+        }
+        break;
     case PadButton::Square:
         dl->AddRect(ImVec2(c.x - s * 0.85f, c.y - s * 0.85f), ImVec2(c.x + s * 0.85f, c.y + s * 0.85f),
                     IM_COL32(255, 105, 248, 255), 0.0f, 0, t);
