@@ -6,6 +6,8 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
 
+#include "profiles.h"
+
 namespace fs = std::filesystem;
 
 namespace {
@@ -371,6 +373,11 @@ void App::UpdateMusic() {
 
 void App::LaunchGame(Game& game) {
     std::string error;
+    if (settings.game_profiles && !settings.emulator_path.empty() &&
+        !ApplyProfile(settings.emulator_path, game.title_id, error) && !error.empty()) {
+        ShowToast(error);
+        error.clear();
+    }
     if (!emulator.Launch(settings.emulator_path, game.root, settings.fullscreen, error)) {
         ShowToast(error);
         if (settings.emulator_path.empty()) {

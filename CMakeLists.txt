@@ -63,6 +63,7 @@ add_executable(lumen WIN32
     src/audio.cpp
     src/at9.cpp
     src/compat.cpp
+    src/profiles.cpp
     src/textures.cpp
     src/ui/theme.cpp
     src/ui/home.cpp

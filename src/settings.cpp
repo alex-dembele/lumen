@@ -59,6 +59,8 @@ void Settings::Load(const std::filesystem::path& file) {
             sounds = value == "1";
         } else if (key == "music") {
             music = value == "1";
+        } else if (key == "game_profiles") {
+            game_profiles = value == "1";
         }
     }
 }
@@ -78,6 +80,7 @@ bool Settings::Save(const std::filesystem::path& file) const {
     out << "minimize_while_playing=" << (minimize_while_playing ? 1 : 0) << '\n';
     out << "sounds=" << (sounds ? 1 : 0) << '\n';
     out << "music=" << (music ? 1 : 0) << '\n';
+    out << "game_profiles=" << (game_profiles ? 1 : 0) << '\n';
     return static_cast<bool>(out);
 }
 

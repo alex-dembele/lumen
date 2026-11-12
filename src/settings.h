@@ -13,6 +13,7 @@ struct Settings {
     bool minimize_while_playing = true;
     bool sounds = true;
     bool music = true;
+    bool game_profiles = true;
 
     void Load(const std::filesystem::path& file);
     bool Save(const std::filesystem::path& file) const;

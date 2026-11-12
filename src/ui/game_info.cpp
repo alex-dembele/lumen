@@ -6,6 +6,7 @@
 #include <string>
 
 #include "app.h"
+#include "profiles.h"
 
 namespace fs = std::filesystem;
 
@@ -140,6 +141,11 @@ bool GameInfoPanel::Draw(App& app, ImVec2 size) {
         Row("Mise à jour", game.update_version.empty() ? "Aucune" : game.update_version);
         Row("Mods", game.has_mods ? "Dossier -mods détecté" : "Aucun");
         Row("Firmware requis", game.required_firmware);
+        if (const GameProfile* profile = FindProfile(game.title_id)) {
+            Row("Réglages shadPS4",
+                std::string(profile->summary) +
+                    (app.settings.game_profiles ? "" : " (désactivé dans les Réglages)"));
+        }
         Row("Taille", size_ready_ ? FormatSize(size_bytes_) : "Calcul en cours...");
         Row("Emplacement", ToUtf8(game.root));
         ImGui::EndTable();

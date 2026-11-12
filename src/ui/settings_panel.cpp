@@ -71,6 +71,8 @@ bool SettingsPanel::Draw(App& app, ImVec2 size) {
     bool changed = false;
     changed |= ImGui::Checkbox("Jouer en plein écran", &app.settings.fullscreen);
     changed |= ImGui::Checkbox("Réduire Lumen pendant le jeu", &app.settings.minimize_while_playing);
+    changed |= ImGui::Checkbox("Appliquer les réglages recommandés par jeu",
+                               &app.settings.game_profiles);
 
     SectionTitle(app, "Son");
     changed |= ImGui::Checkbox("Sons de navigation", &app.settings.sounds);
