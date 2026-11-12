@@ -53,6 +53,15 @@ bool App::Init(const LaunchOptions& options) {
     if (settings.emulator_path.empty()) {
         settings.emulator_path = Emulator::FindDefault();
     }
+    // Paquet prêt à l'emploi : le dossier « Jeux » à côté de Lumen est ajouté d'office.
+    if (settings.game_dirs.empty()) {
+        if (const char* base = SDL_GetBasePath()) {
+            const fs::path games = PathFromUtf8(base) / "Jeux";
+            if (fs::is_directory(games, ec) && settings.AddGameDir(games)) {
+                settings.Save(settings_file_);
+            }
+        }
+    }
 
     const bool screenshot = !options_.screenshot.empty();
     const int width = screenshot ? 1920 : 1280;

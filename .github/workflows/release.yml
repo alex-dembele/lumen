@@ -1,0 +1,64 @@
+name: Release
+
+# Publie un paquet Windows prêt à l'emploi : Lumen + shadPS4 (branche lumen/uncharted4 du fork).
+# Lancement : pousser un tag « v* », ou manuellement depuis l'onglet Actions.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      shadps4_release:
+        description: "Tag de la release shadPS4 à embarquer (fork alex-dembele/shadPS4)"
+        required: false
+
+env:
+  SHADPS4_REPO: alex-dembele/shadPS4
+  SHADPS4_RELEASE: ${{ inputs.shadps4_release || 'lumen-latest' }}
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Compiler Lumen
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          cmake --build build --config Release --parallel
+
+      - name: Récupérer shadPS4
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "$env:SHADPS4_RELEASE" -R "$env:SHADPS4_REPO" -p "*win64*.zip" -D shadps4-dl
+          Expand-Archive -Path (Get-ChildItem shadps4-dl\*.zip | Select-Object -First 1).FullName -DestinationPath shadps4-dl\extracted
+
+      - name: Assembler le paquet
+        run: |
+          $root = "Lumen"
+          New-Item -ItemType Directory -Force -Path "$root\shadPS4\user\sys_modules" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$root\shadPS4\user\custom_configs" | Out-Null
+          New-Item -ItemType Directory -Force -Path "$root\Jeux" | Out-Null
+          Copy-Item build\Release\lumen.exe "$root\Lumen.exe"
+          Copy-Item -Recurse shadps4-dl\extracted\* "$root\shadPS4\"
+          Copy-Item packaging\LISEZ-MOI.txt "$root\"
+          Copy-Item packaging\shadPS4-LICENSE.txt "$root\shadPS4\"
+          Compress-Archive -Path $root -DestinationPath Lumen-Windows-x64.zip
+
+      - name: Publier la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          tag="${GITHUB_REF_NAME}"
+          if [ "${GITHUB_REF_TYPE}" != "tag" ]; then tag="nightly"; fi
+          notes="Lumen + shadPS4 ($SHADPS4_REPO, release $SHADPS4_RELEASE). Code source de shadPS4 : https://github.com/$SHADPS4_REPO"
+          if gh release view "$tag" > /dev/null 2>&1; then
+            gh release upload "$tag" Lumen-Windows-x64.zip --clobber
+          else
+            gh release create "$tag" Lumen-Windows-x64.zip --title "Lumen $tag" --notes "$notes" \
+              $([ "$tag" = "nightly" ] && echo --prerelease)
+          fi

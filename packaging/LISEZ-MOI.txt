@@ -1,0 +1,45 @@
+LUMEN - Interface façon PS4 pour shadPS4
+=========================================
+
+Configuration requise
+---------------------
+- Windows 10 ou 11, 64 bits
+- Processeur x86-64 récent (Intel 8e génération / AMD Ryzen ou plus)
+- Carte graphique compatible Vulkan 1.3, pilotes à jour (NVIDIA, AMD ou Intel)
+
+Premier démarrage
+-----------------
+1. Décompressez le dossier « Lumen » où vous voulez (pas dans « Program Files »).
+
+2. Firmware : copiez dans le dossier  shadPS4\user\sys_modules  les modules suivants,
+   extraits de VOTRE PS4 (dossier /system/common/lib). Beaucoup de jeux en ont besoin :
+
+     libSceAt9Enc  libSceAudiodec  libSceAudiodecCpu  libSceAudiodecCpuDdp
+     libSceAudiodecCpuDtsHdLbr  libSceAudiodecCpuHevag  libSceAudiodecCpuM4aac
+     libSceAvPlayer  libSceAvPlayerStreaming  libSceBeisobmf  libSceBemp2sys  libSceCesCs
+     libSceFont  libSceFontFt  libSceFreeTypeOl  libSceFreeTypeOptOl  libSceFreeTypeOt
+     libSceJpegDec  libSceJpegEnc  libSceJson  libSceJson2  libSceLibcInternal  libSceNgs2
+     libScePngEnc  libScePsmKitSystem  libSceRtc  libSceRudp  libSceSystemGesture  libSceUlt
+     libSceWkFontConfig  libSceXml  libSceDepth  libScePadTracker  libSceMoveTracker
+     (tous avec l'extension .sprx)
+
+3. Jeux : placez les dossiers de vos jeux (ex. CUSA00918, avec eboot.bin et sce_sys) dans
+   le dossier « Jeux ». Les mises à jour vont à côté, avec le suffixe -UPDATE
+   (ex. CUSA00918-UPDATE). Vous pouvez aussi glisser n'importe quel dossier dans la fenêtre
+   de Lumen.
+
+4. Lancez Lumen.exe. Manette ou clavier : ✕ / Entrée pour jouer, △ / I pour la fiche du jeu,
+   Options / Tab pour les réglages.
+
+Bon à savoir
+------------
+- La fiche du jeu indique s'il fonctionne avec shadPS4 (statut communautaire).
+- Pour Uncharted 4 et The Lost Legacy, Lumen applique automatiquement les réglages shadPS4
+  recommandés (protection red zone, readbacks GPU). Ces jeux restent expérimentaux.
+- En cas de plantage, le journal de shadPS4 se trouve dans  shadPS4\user\log .
+
+Lumen ne fournit ni jeux, ni firmware, ni clés : utilisez uniquement des copies extraites
+de vos propres jeux et de votre propre console.
+
+shadPS4 est distribué sous licence GPL v2 (voir shadPS4\shadPS4-LICENSE.txt).
+Son code source : https://github.com/alex-dembele/shadPS4 (branche lumen/uncharted4).

@@ -24,7 +24,15 @@ Lumen gère la bibliothèque et l'expérience « canapé ». L'émulation est as
   [shadps4-game-compatibility](https://github.com/shadps4-compatibility/shadps4-game-compatibility)
   et mis à jour une fois par jour (via `curl`).
 
-## Utilisation
+## Télécharger (Windows)
+
+Le paquet **Lumen-Windows-x64.zip** des [releases](https://github.com/alex-dembele/lumen/releases)
+contient Lumen et shadPS4 (branche `lumen/uncharted4` du fork
+[alex-dembele/shadPS4](https://github.com/alex-dembele/shadPS4), avec des correctifs pour
+Uncharted 4). Décompressez-le et suivez `LISEZ-MOI.txt` : copier les modules firmware de votre
+PS4, placer vos jeux dans `Jeux`, lancer `Lumen.exe`.
+
+## Utilisation (compilation manuelle)
 
 1. Récupérez [shadPS4](https://github.com/shadps4-emu/shadPS4/releases) et placez `shadPS4`
    (ou `shadPS4.exe`) à côté de Lumen. Vous pouvez aussi indiquer son chemin dans les Réglages.
